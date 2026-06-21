@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Caveat:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Comic+Neue:ital,wght@0,400;0,700;1,700&family=Permanent+Marker&family=Caveat:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
@@ -30,7 +30,7 @@
   background:
     radial-gradient(120% 90% at 50% 12%, var(--jungle-2) 0%, var(--jungle) 38%, var(--ink) 100%);
   color:var(--chalk);
-  font-family:"Space Mono",monospace;
+  font-family:"Comic Neue","Space Mono",monospace;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -47,20 +47,11 @@
 .jungle-hero__flag span:nth-child(odd){ background:linear-gradient(var(--green),transparent 85%); }
 .jungle-hero__flag span:nth-child(2){ background:linear-gradient(var(--chalk),transparent 85%); }
 
-/* ---- long red neon veins, undulating like waves (Santa Klara energy) ---- */
-.jungle-hero__veins{
-  position:absolute; inset:-6%; z-index:1; pointer-events:none;
-  filter:drop-shadow(0 0 9px rgba(236,31,26,.6));
-  animation:veinGlow 5s ease-in-out infinite;
+/* ---- real 3D metal chains (three.js) drifting across the whole page ---- */
+.chain3d{
+  position:fixed; inset:0; z-index:45; pointer-events:none;
 }
-.jungle-hero__veins path{
-  fill:none; stroke:var(--blood); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round;
-}
-@keyframes veinGlow{ 0%,100%{opacity:.7} 50%{opacity:1} 
-  25%{ transform:translate(2.2%,-1.6%) rotate(.8deg) scale(1.03); }
-  50%{ transform:translate(-1.8%,1.8%) rotate(-.6deg) scale(1.05); }
-  75%{ transform:translate(1.4%,1.2%) rotate(.5deg) scale(1.02); }
-}
+.chain3d canvas{ display:block; width:100%; height:100%; }
 
 /* ---- grain / noise overlay ---- */
 .jungle-hero__grain{
@@ -98,9 +89,9 @@
 
 /* big wordmark, split around the stack */
 .jungle-hero__word{
-  font-family:"Anton",sans-serif; text-transform:uppercase;
-  line-height:.84; color:var(--chalk);
-  letter-spacing:.02em;
+  font-family:"Bangers","Anton",sans-serif; text-transform:uppercase;
+  line-height:.9; color:var(--chalk);
+  letter-spacing:.04em;
   text-shadow:0 0 1px rgba(0,0,0,.5);
 }
 .jungle-hero__word--top{ font-size:clamp(30px,7vw,78px); }
@@ -286,32 +277,199 @@
 }
 
 @media (prefers-reduced-motion:reduce){
-  .stage__float,.jungle-hero__grain,.jungle-hero__veins,.jungle-hero__veins path,.eq i,.now-pill .mini i,.note{ animation:none; }
+  .stage__float,.jungle-hero__grain,.eq i,.now-pill .mini i,.note{ animation:none; }
   .card{ transition:none; }
 }
+
+/* ===== atmosphere: smoke · particles · silhouettes ===== */
+.atmos{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+.smoke{ position:absolute; inset:-25%; }
+.smoke b{
+  position:absolute; display:block; border-radius:50%;
+  background:radial-gradient(closest-side, rgba(22,166,79,.16), rgba(11,28,20,0) 72%);
+  filter:blur(30px); mix-blend-mode:screen; opacity:0;
+  animation:smokeDrift var(--sd,26s) ease-in-out infinite;
+}
+.smoke b.warm{ background:radial-gradient(closest-side, rgba(236,31,26,.14), rgba(11,28,20,0) 72%); }
+@keyframes smokeDrift{
+  0%{ transform:translate(0,12%) scale(1); opacity:0 }
+  18%{ opacity:.7 } 82%{ opacity:.5 }
+  100%{ transform:translate(var(--sx,8%),-34%) scale(1.55); opacity:0 }
+}
+
+.particles{ position:absolute; inset:0; z-index:5; pointer-events:none; overflow:hidden; }
+.particles i{
+  position:absolute; bottom:-12px; width:var(--s,4px); height:var(--s,4px);
+  border-radius:50%; background:var(--green-soft); box-shadow:0 0 8px rgba(63,217,127,.85);
+  opacity:0; animation:floatUp var(--d,14s) linear infinite;
+}
+@keyframes floatUp{
+  0%{ transform:translate(0,0); opacity:0 }
+  10%{ opacity:.85 } 90%{ opacity:.5 }
+  100%{ transform:translate(var(--dx,20px),-104vh); opacity:0 }
+}
+
+.silhouettes{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+.silhouettes img{
+  position:absolute; bottom:-2%; height:clamp(260px,58vh,600px); width:auto;
+  filter:brightness(0); opacity:.2;
+  animation:sway var(--sw,9s) ease-in-out infinite;
+}
+.silhouettes .s-l{ left:-3%; }
+.silhouettes .s-r{ right:-3%; animation-delay:-3.2s; }
+@keyframes sway{ 0%,100%{ transform:translateY(0) rotate(0deg) } 50%{ transform:translateY(-12px) rotate(.7deg) } }
+
+/* ===== scroll story: camera zoom · character reveal · album story ===== */
+.story{ position:relative; height:360vh; background:var(--ink); }
+.story__stage{
+  position:sticky; top:0; height:100svh; overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 28%, var(--jungle-2), var(--ink) 72%);
+}
+.story__rig{
+  position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:center;
+  transform-origin:50% 74%; transform:scale(calc(1 + var(--p,0) * 1.7));
+  will-change:transform;
+}
+.story__char{
+  height:80vh; width:auto;
+  filter:brightness(calc(.1 + var(--p,0) * 1)) contrast(1.05)
+         drop-shadow(0 0 34px rgba(236,31,26,calc(var(--p,0) * .55)));
+  animation:charBreath 5s ease-in-out infinite;
+}
+@keyframes charBreath{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-12px) } }
+
+.story__steps{ position:absolute; inset:0; z-index:6; pointer-events:none; }
+.story__step{
+  position:absolute; left:50%; top:46%; width:min(88vw,760px);
+  transform:translate(-50%,-50%) translateY(26px); text-align:center;
+  opacity:0; transition:opacity .55s ease, transform .55s ease;
+}
+.story__step.is-on{ opacity:1; transform:translate(-50%,-50%) translateY(0); }
+.story__step h3{
+  font-family:"Bangers","Anton",sans-serif; text-transform:uppercase; letter-spacing:.03em;
+  font-size:clamp(40px,9vw,108px); line-height:.92; color:var(--chalk);
+  text-shadow:3px 3px 0 var(--blood), 0 6px 34px rgba(0,0,0,.6);
+}
+.story__step h3 em{ font-style:normal; color:var(--blood); }
+.story__step p{
+  margin:16px auto 0; max-width:34ch;
+  font-family:"Space Mono",monospace; color:var(--chalk-dim);
+  font-size:clamp(13px,2.3vw,17px); line-height:1.6;
+}
+.story__cue{
+  position:absolute; bottom:22px; left:50%; transform:translateX(-50%); z-index:7;
+  font-family:"Space Mono",monospace; font-size:11px; letter-spacing:.35em; text-transform:uppercase;
+  color:var(--green-soft); opacity:.75; animation:cueBob 2s ease-in-out infinite;
+}
+.story__cue::after{ content:" \2193"; }
+@keyframes cueBob{ 0%,100%{ transform:translateX(-50%) translateY(0) } 50%{ transform:translateX(-50%) translateY(7px) } }
+
+@media (max-width:640px){
+  .silhouettes img{ height:40vh; opacity:.14; }
+  .story__char{ height:62vh; }
+  .story{ height:300vh; }
+}
+@media (prefers-reduced-motion:reduce){
+  .smoke b,.particles i,.silhouettes img,.story__char,.story__cue{ animation:none !important; }
+  .story__rig{ transform:none !important; }
+  .story__char{ filter:brightness(.9); }
+}
+
+/* ===== comic book strip ===== */
+.comic{ position:relative; background:#f4efe2; padding:2vw 0 14vw; overflow:hidden; color:#111; }
+.comic::before{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.16;
+  background-image:radial-gradient(rgba(0,0,0,.55) 1.3px, transparent 1.5px);
+  background-size:9px 9px;
+}
+.comic__splash{ position:relative; text-align:center; padding:12vw 6vw 8vw; }
+.comic__splash h2{
+  font-family:"Bangers",cursive; font-size:clamp(46px,14vw,168px); line-height:.86; color:#111;
+  text-shadow:5px 5px 0 var(--blood), 10px 10px 0 rgba(0,0,0,.16);
+}
+.comic__splash h2 em{ color:var(--green); font-style:normal; }
+.comic__splash p{ font-family:"Comic Neue",cursive; font-weight:700; color:#444; margin-top:16px; font-size:clamp(14px,2.4vw,21px); }
+
+.panels{ position:relative; display:flex; flex-direction:column; gap:8vw; max-width:1080px; margin:0 auto; padding:0 5vw; }
+.panel{
+  position:relative; background:#fff; border:4px solid #111; border-radius:6px;
+  box-shadow:10px 12px 0 rgba(0,0,0,.85);
+  display:grid; grid-template-columns:1fr 1fr; align-items:stretch; min-height:58vh;
+  overflow:hidden; opacity:0; transform:translateY(46px) rotate(-1.4deg) scale(.95);
+  transition:opacity .5s ease, transform .55s cubic-bezier(.2,.9,.3,1.25);
+}
+.panel.is-in{ opacity:1; transform:translateY(0) rotate(var(--rot,-.6deg)) scale(1); }
+.panel:nth-child(even){ --rot:.7deg; }
+.panel:nth-child(even) .panel__art{ order:2; border-left:4px solid #111; border-right:0; }
+
+.panel__art{ position:relative; display:flex; align-items:flex-end; justify-content:center; border-right:4px solid #111; }
+.panel__art::before{ content:""; position:absolute; inset:0; background:var(--pc,radial-gradient(circle at 50% 28%, #ffd23f, #ff8a00)); }
+.panel__art::after{ content:""; position:absolute; inset:0; opacity:.22;
+  background-image:radial-gradient(rgba(0,0,0,.6) 1.5px, transparent 1.7px); background-size:8px 8px; }
+.panel__art img{ position:relative; z-index:1; height:54vh; max-height:520px; width:auto; object-fit:contain;
+  filter:drop-shadow(6px 8px 0 rgba(0,0,0,.32)); }
+
+.panel.c-red    .panel__art::before{ background:radial-gradient(circle at 50% 28%, #ff5a52, #b3120d); }
+.panel.c-green  .panel__art::before{ background:radial-gradient(circle at 50% 28%, #5be58b, #0f8a3d); }
+.panel.c-blue   .panel__art::before{ background:radial-gradient(circle at 50% 28%, #6cc5ff, #1565c0); }
+.panel.c-yellow .panel__art::before{ background:radial-gradient(circle at 50% 28%, #ffd23f, #ff8a00); }
+.panel.c-purple .panel__art::before{ background:radial-gradient(circle at 50% 28%, #c79bff, #6a2bd6); }
+
+.panel__text{ position:relative; padding:30px 26px; display:flex; flex-direction:column; justify-content:center; gap:18px; }
+.cap-box{
+  align-self:flex-start; background:#ffd23f; color:#111; border:3px solid #111;
+  padding:8px 15px; transform:rotate(-2deg);
+  font-family:"Bangers",cursive; font-size:clamp(24px,4.4vw,46px); letter-spacing:.02em;
+  box-shadow:4px 4px 0 rgba(0,0,0,.85);
+}
+.bubble{
+  position:relative; align-self:flex-start; background:#fff; border:3px solid #111; border-radius:18px;
+  padding:14px 18px; font-family:"Comic Neue",cursive; font-weight:700; color:#111;
+  font-size:clamp(16px,2.8vw,23px); max-width:30ch; box-shadow:4px 4px 0 rgba(0,0,0,.2);
+}
+.bubble::after{ content:""; position:absolute; left:30px; bottom:-16px; border:9px solid transparent; border-top-color:#111; }
+.bubble::before{ content:""; position:absolute; left:33px; bottom:-9px; border:6px solid transparent; border-top-color:#fff; z-index:1; }
+.panel__num{ position:absolute; top:6px; right:14px; z-index:2; font-family:"Bangers",cursive; color:#111; opacity:.22; font-size:34px; }
+.boom{
+  position:absolute; z-index:3; font-family:"Bangers",cursive; color:#fff; -webkit-text-stroke:3px #111;
+  font-size:clamp(32px,7vw,76px); transform:rotate(-12deg); text-shadow:5px 5px 0 var(--blood); pointer-events:none;
+}
+
+.comic__outro{
+  position:relative; margin:12vw auto 0; max-width:1000px; padding:6vw 5vw;
+  display:flex; gap:5vw; align-items:center; flex-wrap:wrap; justify-content:center;
+  background:#111; border:4px solid #111; border-radius:8px; box-shadow:12px 14px 0 rgba(236,31,26,.9);
+}
+.comic__tracklist{ width:min(360px,72vw); border:4px solid #fff; box-shadow:6px 6px 0 rgba(0,0,0,.5); display:block; }
+.comic__outro h2{ font-family:"Bangers",cursive; color:#fff; font-size:clamp(46px,10vw,108px); line-height:.86; }
+.comic__outro h2 em{ color:var(--blood); font-style:normal; }
+.comic__outro p{ font-family:"Comic Neue",cursive; font-weight:700; color:#cfd6cd; margin-top:12px; font-size:clamp(15px,2.6vw,23px); }
+
+@media (max-width:680px){
+  .panel{ grid-template-columns:1fr; }
+  .panel__art{ border-right:0; border-bottom:4px solid #111; min-height:46vh; }
+  .panel:nth-child(even) .panel__art{ order:0; border-left:0; }
+  .panel__art img{ height:40vh; }
+}
+@media (prefers-reduced-motion:reduce){
+  .panel{ opacity:1; transform:none; transition:none; }
+}
 </style>
+
+<div class="chain3d" id="chain3d" aria-hidden="true"></div>
 
 <section class="jungle-hero" aria-label="Welcome to the Jungle — album hero">
 
   <div class="jungle-hero__flag" aria-hidden="true"><span></span><span></span><span></span></div>
 
-  <svg class="jungle-hero__veins" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <path class="v1" d="M -60 441.3 L -40 449.8 L -20 459.6 L 0 470.0 L 20 480.4 L 40 490.2 L 60 498.7 L 80 505.5 L 100 510.0 L 120 512.1 L 140 511.5 L 160 508.2 L 180 502.5 L 200 494.5 L 220 484.8 L 240 473.8 L 260 462.2 L 280 450.6 L 300 439.6 L 320 429.9 L 340 421.9 L 360 416.2 L 380 412.9 L 400 412.3 L 420 414.4 L 440 418.9 L 460 425.7 L 480 434.2 L 500 444.0 L 520 454.4 L 540 464.8 L 560 474.6 L 580 483.1 L 600 489.9 L 620 494.4 L 640 496.5 L 660 495.9 L 680 492.6 L 700 486.9 L 720 478.9 L 740 469.2 L 760 458.2 L 780 446.6 L 800 435.0 L 820 424.0 L 840 414.3 L 860 406.3 L 880 400.6 L 900 397.3 L 920 396.7 L 940 398.8 L 960 403.3 L 980 410.1 L 1000 418.6 L 1020 428.4 L 1040 438.8 L 1060 449.2" opacity=".55">
-      <animate attributeName="d" values="M -60 441.3 L -40 449.8 L -20 459.6 L 0 470.0 L 20 480.4 L 40 490.2 L 60 498.7 L 80 505.5 L 100 510.0 L 120 512.1 L 140 511.5 L 160 508.2 L 180 502.5 L 200 494.5 L 220 484.8 L 240 473.8 L 260 462.2 L 280 450.6 L 300 439.6 L 320 429.9 L 340 421.9 L 360 416.2 L 380 412.9 L 400 412.3 L 420 414.4 L 440 418.9 L 460 425.7 L 480 434.2 L 500 444.0 L 520 454.4 L 540 464.8 L 560 474.6 L 580 483.1 L 600 489.9 L 620 494.4 L 640 496.5 L 660 495.9 L 680 492.6 L 700 486.9 L 720 478.9 L 740 469.2 L 760 458.2 L 780 446.6 L 800 435.0 L 820 424.0 L 840 414.3 L 860 406.3 L 880 400.6 L 900 397.3 L 920 396.7 L 940 398.8 L 960 403.3 L 980 410.1 L 1000 418.6 L 1020 428.4 L 1040 438.8 L 1060 449.2;M -60 506.2 L -40 511.9 L -20 515.3 L 0 516.0 L 20 514.1 L 40 509.5 L 60 502.6 L 80 493.7 L 100 483.3 L 120 471.9 L 140 460.3 L 160 448.9 L 180 438.5 L 200 429.6 L 220 422.7 L 240 418.1 L 260 416.2 L 280 416.9 L 300 420.3 L 320 426.0 L 340 433.7 L 360 442.9 L 380 453.1 L 400 463.5 L 420 473.7 L 440 482.9 L 460 490.6 L 480 496.3 L 500 499.7 L 520 500.4 L 540 498.5 L 560 493.9 L 580 487.0 L 600 478.1 L 620 467.7 L 640 456.3 L 660 444.7 L 680 433.3 L 700 422.9 L 720 414.0 L 740 407.1 L 760 402.5 L 780 400.6 L 800 401.3 L 820 404.7 L 840 410.4 L 860 418.1 L 880 427.3 L 900 437.5 L 920 447.9 L 940 458.1 L 960 467.3 L 980 475.0 L 1000 480.7 L 1020 484.1 L 1040 484.8 L 1060 482.9;M -60 502.3 L -40 492.6 L -20 481.6 L 0 470.0 L 20 458.4 L 40 447.4 L 60 437.7 L 80 429.7 L 100 424.0 L 120 420.7 L 140 420.1 L 160 422.2 L 180 426.7 L 200 433.5 L 220 442.0 L 240 451.8 L 260 462.2 L 280 472.6 L 300 482.4 L 320 490.9 L 340 497.7 L 360 502.2 L 380 504.3 L 400 503.7 L 420 500.4 L 440 494.7 L 460 486.7 L 480 477.0 L 500 466.0 L 520 454.4 L 540 442.8 L 560 431.8 L 580 422.1 L 600 414.1 L 620 408.4 L 640 405.1 L 660 404.5 L 680 406.6 L 700 411.1 L 720 417.9 L 740 426.4 L 760 436.2 L 780 446.6 L 800 457.0 L 820 466.8 L 840 475.3 L 860 482.1 L 880 486.6 L 900 488.7 L 920 488.1 L 940 484.8 L 960 479.1 L 980 471.1 L 1000 461.4 L 1020 450.4 L 1040 438.8 L 1060 427.2;M -60 437.4 L -40 430.5 L -20 425.9 L 0 424.0 L 20 424.7 L 40 428.1 L 60 433.8 L 80 441.5 L 100 450.7 L 120 460.9 L 140 471.3 L 160 481.5 L 180 490.7 L 200 498.4 L 220 504.1 L 240 507.5 L 260 508.2 L 280 506.3 L 300 501.7 L 320 494.8 L 340 485.9 L 360 475.5 L 380 464.1 L 400 452.5 L 420 441.1 L 440 430.7 L 460 421.8 L 480 414.9 L 500 410.3 L 520 408.4 L 540 409.1 L 560 412.5 L 580 418.2 L 600 425.9 L 620 435.1 L 640 445.3 L 660 455.7 L 680 465.9 L 700 475.1 L 720 482.8 L 740 488.5 L 760 491.9 L 780 492.6 L 800 490.7 L 820 486.1 L 840 479.2 L 860 470.3 L 880 459.9 L 900 448.5 L 920 436.9 L 940 425.5 L 960 415.1 L 980 406.2 L 1000 399.3 L 1020 394.7 L 1040 392.8 L 1060 393.5;M -60 441.3 L -40 449.8 L -20 459.6 L 0 470.0 L 20 480.4 L 40 490.2 L 60 498.7 L 80 505.5 L 100 510.0 L 120 512.1 L 140 511.5 L 160 508.2 L 180 502.5 L 200 494.5 L 220 484.8 L 240 473.8 L 260 462.2 L 280 450.6 L 300 439.6 L 320 429.9 L 340 421.9 L 360 416.2 L 380 412.9 L 400 412.3 L 420 414.4 L 440 418.9 L 460 425.7 L 480 434.2 L 500 444.0 L 520 454.4 L 540 464.8 L 560 474.6 L 580 483.1 L 600 489.9 L 620 494.4 L 640 496.5 L 660 495.9 L 680 492.6 L 700 486.9 L 720 478.9 L 740 469.2 L 760 458.2 L 780 446.6 L 800 435.0 L 820 424.0 L 840 414.3 L 860 406.3 L 880 400.6 L 900 397.3 L 920 396.7 L 940 398.8 L 960 403.3 L 980 410.1 L 1000 418.6 L 1020 428.4 L 1040 438.8 L 1060 449.2" dur="7s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.25;0.5;0.75;1" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/>
-    </path>
-    <path class="v2" d="M -60 229.4 L -40 235.8 L -20 242.8 L 0 250.0 L 20 257.2 L 40 264.2 L 60 270.6 L 80 276.2 L 100 280.9 L 120 284.3 L 140 286.4 L 160 287.2 L 180 286.5 L 200 284.5 L 220 281.3 L 240 276.9 L 260 271.7 L 280 265.8 L 300 259.4 L 320 253.0 L 340 246.6 L 360 240.7 L 380 235.5 L 400 231.1 L 420 227.9 L 440 225.9 L 460 225.2 L 480 226.0 L 500 228.1 L 520 231.5 L 540 236.2 L 560 241.8 L 580 248.2 L 600 255.2 L 620 262.4 L 640 269.6 L 660 276.6 L 680 283.0 L 700 288.6 L 720 293.3 L 740 296.7 L 760 298.8 L 780 299.6 L 800 298.9 L 820 296.9 L 840 293.7 L 860 289.3 L 880 284.1 L 900 278.2 L 920 271.8 L 940 265.4 L 960 259.0 L 980 253.1 L 1000 247.9 L 1020 243.5 L 1040 240.3 L 1060 238.3" opacity=".32">
-      <animate attributeName="d" values="M -60 229.4 L -40 235.8 L -20 242.8 L 0 250.0 L 20 257.2 L 40 264.2 L 60 270.6 L 80 276.2 L 100 280.9 L 120 284.3 L 140 286.4 L 160 287.2 L 180 286.5 L 200 284.5 L 220 281.3 L 240 276.9 L 260 271.7 L 280 265.8 L 300 259.4 L 320 253.0 L 340 246.6 L 360 240.7 L 380 235.5 L 400 231.1 L 420 227.9 L 440 225.9 L 460 225.2 L 480 226.0 L 500 228.1 L 520 231.5 L 540 236.2 L 560 241.8 L 580 248.2 L 600 255.2 L 620 262.4 L 640 269.6 L 660 276.6 L 680 283.0 L 700 288.6 L 720 293.3 L 740 296.7 L 760 298.8 L 780 299.6 L 800 298.9 L 820 296.9 L 840 293.7 L 860 289.3 L 880 284.1 L 900 278.2 L 920 271.8 L 940 265.4 L 960 259.0 L 980 253.1 L 1000 247.9 L 1020 243.5 L 1040 240.3 L 1060 238.3;M -60 276.7 L -40 280.4 L -20 282.9 L 0 284.0 L 20 283.7 L 40 282.0 L 60 279.1 L 80 275.0 L 100 270.0 L 120 264.2 L 140 257.9 L 160 251.5 L 180 245.1 L 200 239.0 L 220 233.6 L 240 229.0 L 260 225.5 L 280 223.2 L 300 222.2 L 320 222.6 L 340 224.4 L 360 227.5 L 380 231.8 L 400 237.2 L 420 243.4 L 440 250.3 L 460 257.5 L 480 264.7 L 500 271.8 L 520 278.4 L 540 284.2 L 560 289.1 L 580 292.8 L 600 295.3 L 620 296.4 L 640 296.1 L 660 294.4 L 680 291.5 L 700 287.4 L 720 282.4 L 740 276.6 L 760 270.3 L 780 263.9 L 800 257.5 L 820 251.4 L 840 246.0 L 860 241.4 L 880 237.9 L 900 235.6 L 920 234.6 L 940 235.0 L 960 236.8 L 980 239.9 L 1000 244.2 L 1020 249.6 L 1040 255.8 L 1060 262.7;M -60 268.2 L -40 262.6 L -20 256.4 L 0 250.0 L 20 243.6 L 40 237.4 L 60 231.8 L 80 227.0 L 100 223.1 L 120 220.5 L 140 219.2 L 160 219.2 L 180 220.7 L 200 223.5 L 220 227.5 L 240 232.7 L 260 238.7 L 280 245.4 L 300 252.6 L 320 259.8 L 340 267.0 L 360 273.7 L 380 279.7 L 400 284.9 L 420 288.9 L 440 291.7 L 460 293.2 L 480 293.2 L 500 291.9 L 520 289.3 L 540 285.4 L 560 280.6 L 580 275.0 L 600 268.8 L 620 262.4 L 640 256.0 L 660 249.8 L 680 244.2 L 700 239.4 L 720 235.5 L 740 232.9 L 760 231.6 L 780 231.6 L 800 233.1 L 820 235.9 L 840 239.9 L 860 245.1 L 880 251.1 L 900 257.8 L 920 265.0 L 940 272.2 L 960 279.4 L 980 286.1 L 1000 292.1 L 1020 297.3 L 1040 301.3 L 1060 304.1;M -60 220.9 L -40 218.0 L -20 216.3 L 0 216.0 L 20 217.1 L 40 219.6 L 60 223.3 L 80 228.2 L 100 234.0 L 120 240.6 L 140 247.7 L 160 254.9 L 180 262.1 L 200 269.0 L 220 275.2 L 240 280.6 L 260 284.9 L 280 288.0 L 300 289.8 L 320 290.2 L 340 289.2 L 360 286.9 L 380 283.4 L 400 278.8 L 420 273.4 L 440 267.3 L 460 260.9 L 480 254.5 L 500 248.2 L 520 242.4 L 540 237.4 L 560 233.3 L 580 230.4 L 600 228.7 L 620 228.4 L 640 229.5 L 660 232.0 L 680 235.7 L 700 240.6 L 720 246.4 L 740 253.0 L 760 260.1 L 780 267.3 L 800 274.5 L 820 281.4 L 840 287.6 L 860 293.0 L 880 297.3 L 900 300.4 L 920 302.2 L 940 302.6 L 960 301.6 L 980 299.3 L 1000 295.8 L 1020 291.2 L 1040 285.8 L 1060 279.7;M -60 229.4 L -40 235.8 L -20 242.8 L 0 250.0 L 20 257.2 L 40 264.2 L 60 270.6 L 80 276.2 L 100 280.9 L 120 284.3 L 140 286.4 L 160 287.2 L 180 286.5 L 200 284.5 L 220 281.3 L 240 276.9 L 260 271.7 L 280 265.8 L 300 259.4 L 320 253.0 L 340 246.6 L 360 240.7 L 380 235.5 L 400 231.1 L 420 227.9 L 440 225.9 L 460 225.2 L 480 226.0 L 500 228.1 L 520 231.5 L 540 236.2 L 560 241.8 L 580 248.2 L 600 255.2 L 620 262.4 L 640 269.6 L 660 276.6 L 680 283.0 L 700 288.6 L 720 293.3 L 740 296.7 L 760 298.8 L 780 299.6 L 800 298.9 L 820 296.9 L 840 293.7 L 860 289.3 L 880 284.1 L 900 278.2 L 920 271.8 L 940 265.4 L 960 259.0 L 980 253.1 L 1000 247.9 L 1020 243.5 L 1040 240.3 L 1060 238.3" dur="9s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.25;0.5;0.75;1" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/>
-    </path>
-    <path class="v3" d="M -60 534.9 L -40 542.2 L -20 550.7 L 0 560.0 L 20 569.3 L 40 577.8 L 60 585.1 L 80 590.5 L 100 593.7 L 120 594.5 L 140 592.9 L 160 589.1 L 180 583.4 L 200 576.5 L 220 568.8 L 240 561.1 L 260 554.2 L 280 548.5 L 300 544.7 L 320 543.1 L 340 543.9 L 360 547.1 L 380 552.5 L 400 559.8 L 420 568.3 L 440 577.6 L 460 586.9 L 480 595.4 L 500 602.7 L 520 608.1 L 540 611.3 L 560 612.1 L 580 610.5 L 600 606.7 L 620 601.0 L 640 594.1 L 660 586.4 L 680 578.7 L 700 571.8 L 720 566.1 L 740 562.3 L 760 560.7 L 780 561.5 L 800 564.7 L 820 570.1 L 840 577.4 L 860 585.9 L 880 595.2 L 900 604.5 L 920 613.0 L 940 620.3 L 960 625.7 L 980 628.9 L 1000 629.7 L 1020 628.1 L 1040 624.3 L 1060 618.6" opacity=".4">
-      <animate attributeName="d" values="M -60 534.9 L -40 542.2 L -20 550.7 L 0 560.0 L 20 569.3 L 40 577.8 L 60 585.1 L 80 590.5 L 100 593.7 L 120 594.5 L 140 592.9 L 160 589.1 L 180 583.4 L 200 576.5 L 220 568.8 L 240 561.1 L 260 554.2 L 280 548.5 L 300 544.7 L 320 543.1 L 340 543.9 L 360 547.1 L 380 552.5 L 400 559.8 L 420 568.3 L 440 577.6 L 460 586.9 L 480 595.4 L 500 602.7 L 520 608.1 L 540 611.3 L 560 612.1 L 580 610.5 L 600 606.7 L 620 601.0 L 640 594.1 L 660 586.4 L 680 578.7 L 700 571.8 L 720 566.1 L 740 562.3 L 760 560.7 L 780 561.5 L 800 564.7 L 820 570.1 L 840 577.4 L 860 585.9 L 880 595.2 L 900 604.5 L 920 613.0 L 940 620.3 L 960 625.7 L 980 628.9 L 1000 629.7 L 1020 628.1 L 1040 624.3 L 1060 618.6;M -60 577.2 L -40 583.6 L -20 588.0 L 0 590.0 L 20 589.6 L 40 586.8 L 60 582.0 L 80 575.7 L 100 568.3 L 120 560.5 L 140 553.1 L 160 546.8 L 180 542.0 L 200 539.2 L 220 538.8 L 240 540.8 L 260 545.2 L 280 551.6 L 300 559.5 L 320 568.5 L 340 577.9 L 360 586.9 L 380 594.8 L 400 601.2 L 420 605.6 L 440 607.6 L 460 607.2 L 480 604.4 L 500 599.6 L 520 593.3 L 540 585.9 L 560 578.1 L 580 570.7 L 600 564.4 L 620 559.6 L 640 556.8 L 660 556.4 L 680 558.4 L 700 562.8 L 720 569.2 L 740 577.1 L 760 586.1 L 780 595.5 L 800 604.5 L 820 612.4 L 840 618.8 L 860 623.2 L 880 625.2 L 900 624.8 L 920 622.0 L 940 617.2 L 960 610.9 L 980 603.5 L 1000 595.7 L 1020 588.3 L 1040 582.0 L 1060 577.2;M -60 580.3 L -40 574.6 L -20 567.7 L 0 560.0 L 20 552.3 L 40 545.4 L 60 539.7 L 80 535.9 L 100 534.3 L 120 535.1 L 140 538.3 L 160 543.7 L 180 551.0 L 200 559.5 L 220 568.8 L 240 578.1 L 260 586.6 L 280 593.9 L 300 599.3 L 320 602.5 L 340 603.3 L 360 601.7 L 380 597.9 L 400 592.2 L 420 585.3 L 440 577.6 L 460 569.9 L 480 563.0 L 500 557.3 L 520 553.5 L 540 551.9 L 560 552.7 L 580 555.9 L 600 561.3 L 620 568.6 L 640 577.1 L 660 586.4 L 680 595.7 L 700 604.2 L 720 611.5 L 740 616.9 L 760 620.1 L 780 620.9 L 800 619.3 L 820 615.5 L 840 609.8 L 860 602.9 L 880 595.2 L 900 587.5 L 920 580.6 L 940 574.9 L 960 571.1 L 980 569.5 L 1000 570.3 L 1020 573.5 L 1040 578.9 L 1060 586.2;M -60 538.0 L -40 533.2 L -20 530.4 L 0 530.0 L 20 532.0 L 40 536.4 L 60 542.8 L 80 550.7 L 100 559.7 L 120 569.1 L 140 578.1 L 160 586.0 L 180 592.4 L 200 596.8 L 220 598.8 L 240 598.4 L 260 595.6 L 280 590.8 L 300 584.5 L 320 577.1 L 340 569.3 L 360 561.9 L 380 555.6 L 400 550.8 L 420 548.0 L 440 547.6 L 460 549.6 L 480 554.0 L 500 560.4 L 520 568.3 L 540 577.3 L 560 586.7 L 580 595.7 L 600 603.6 L 620 610.0 L 640 614.4 L 660 616.4 L 680 616.0 L 700 613.2 L 720 608.4 L 740 602.1 L 760 594.7 L 780 586.9 L 800 579.5 L 820 573.2 L 840 568.4 L 860 565.6 L 880 565.2 L 900 567.2 L 920 571.6 L 940 578.0 L 960 585.9 L 980 594.9 L 1000 604.3 L 1020 613.3 L 1040 621.2 L 1060 627.6;M -60 534.9 L -40 542.2 L -20 550.7 L 0 560.0 L 20 569.3 L 40 577.8 L 60 585.1 L 80 590.5 L 100 593.7 L 120 594.5 L 140 592.9 L 160 589.1 L 180 583.4 L 200 576.5 L 220 568.8 L 240 561.1 L 260 554.2 L 280 548.5 L 300 544.7 L 320 543.1 L 340 543.9 L 360 547.1 L 380 552.5 L 400 559.8 L 420 568.3 L 440 577.6 L 460 586.9 L 480 595.4 L 500 602.7 L 520 608.1 L 540 611.3 L 560 612.1 L 580 610.5 L 600 606.7 L 620 601.0 L 640 594.1 L 660 586.4 L 680 578.7 L 700 571.8 L 720 566.1 L 740 562.3 L 760 560.7 L 780 561.5 L 800 564.7 L 820 570.1 L 840 577.4 L 860 585.9 L 880 595.2 L 900 604.5 L 920 613.0 L 940 620.3 L 960 625.7 L 980 628.9 L 1000 629.7 L 1020 628.1 L 1040 624.3 L 1060 618.6" dur="6s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.25;0.5;0.75;1" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/>
-    </path>
-    <path class="v4" d="M -60 137.9 L -40 141.7 L -20 145.8 L 0 150.0 L 20 154.2 L 40 158.3 L 60 162.1 L 80 165.5 L 100 168.3 L 120 170.5 L 140 171.9 L 160 172.6 L 180 172.4 L 200 171.3 L 220 169.5 L 240 166.9 L 260 163.6 L 280 159.7 L 300 155.3 L 320 150.5 L 340 145.5 L 360 140.5 L 380 135.5 L 400 130.7 L 420 126.3 L 440 122.4 L 460 119.1 L 480 116.5 L 500 114.7 L 520 113.6 L 540 113.4 L 560 114.1 L 580 115.5 L 600 117.7 L 620 120.5 L 640 123.9 L 660 127.7 L 680 131.8 L 700 136.0 L 720 140.2 L 740 144.3 L 760 148.1 L 780 151.5 L 800 154.3 L 820 156.5 L 840 157.9 L 860 158.6 L 880 158.4 L 900 157.3 L 920 155.5 L 940 152.9 L 960 149.6 L 980 145.7 L 1000 141.3 L 1020 136.5 L 1040 131.5 L 1060 126.5" opacity=".3">
-      <animate attributeName="d" values="M -60 137.9 L -40 141.7 L -20 145.8 L 0 150.0 L 20 154.2 L 40 158.3 L 60 162.1 L 80 165.5 L 100 168.3 L 120 170.5 L 140 171.9 L 160 172.6 L 180 172.4 L 200 171.3 L 220 169.5 L 240 166.9 L 260 163.6 L 280 159.7 L 300 155.3 L 320 150.5 L 340 145.5 L 360 140.5 L 380 135.5 L 400 130.7 L 420 126.3 L 440 122.4 L 460 119.1 L 480 116.5 L 500 114.7 L 520 113.6 L 540 113.4 L 560 114.1 L 580 115.5 L 600 117.7 L 620 120.5 L 640 123.9 L 660 127.7 L 680 131.8 L 700 136.0 L 720 140.2 L 740 144.3 L 760 148.1 L 780 151.5 L 800 154.3 L 820 156.5 L 840 157.9 L 860 158.6 L 880 158.4 L 900 157.3 L 920 155.5 L 940 152.9 L 960 149.6 L 980 145.7 L 1000 141.3 L 1020 136.5 L 1040 131.5 L 1060 126.5;M -60 173.5 L -40 175.1 L -20 176.0 L 0 176.0 L 20 175.2 L 40 173.5 L 60 171.1 L 80 168.0 L 100 164.2 L 120 159.9 L 140 155.2 L 160 150.3 L 180 145.2 L 200 140.2 L 220 135.4 L 240 130.9 L 260 126.8 L 280 123.4 L 300 120.6 L 320 118.5 L 340 117.3 L 360 116.9 L 380 117.3 L 400 118.6 L 420 120.6 L 440 123.2 L 460 126.5 L 480 130.2 L 500 134.2 L 520 138.4 L 540 142.7 L 560 146.8 L 580 150.7 L 600 154.2 L 620 157.2 L 640 159.5 L 660 161.1 L 680 162.0 L 700 162.0 L 720 161.2 L 740 159.5 L 760 157.1 L 780 154.0 L 800 150.2 L 820 145.9 L 840 141.2 L 860 136.3 L 880 131.2 L 900 126.2 L 920 121.4 L 940 116.9 L 960 112.8 L 980 109.4 L 1000 106.6 L 1020 104.5 L 1040 103.3 L 1060 102.9;M -60 164.5 L -40 159.9 L -20 155.0 L 0 150.0 L 20 145.0 L 40 140.1 L 60 135.5 L 80 131.3 L 100 127.7 L 120 124.7 L 140 122.5 L 160 121.0 L 180 120.4 L 200 120.7 L 220 121.7 L 240 123.5 L 260 126.0 L 280 129.1 L 300 132.7 L 320 136.7 L 340 140.9 L 360 145.1 L 380 149.3 L 400 153.3 L 420 156.9 L 440 160.0 L 460 162.5 L 480 164.3 L 500 165.3 L 520 165.6 L 540 165.0 L 560 163.5 L 580 161.3 L 600 158.3 L 620 154.7 L 640 150.5 L 660 145.9 L 680 141.0 L 700 136.0 L 720 131.0 L 740 126.1 L 760 121.5 L 780 117.3 L 800 113.7 L 820 110.7 L 840 108.5 L 860 107.0 L 880 106.4 L 900 106.7 L 920 107.7 L 940 109.5 L 960 112.0 L 980 115.1 L 1000 118.7 L 1020 122.7 L 1040 126.9 L 1060 131.1;M -60 128.9 L -40 126.5 L -20 124.8 L 0 124.0 L 20 124.0 L 40 124.9 L 60 126.5 L 80 128.8 L 100 131.8 L 120 135.3 L 140 139.2 L 160 143.3 L 180 147.6 L 200 151.8 L 220 155.8 L 240 159.5 L 260 162.8 L 280 165.4 L 300 167.4 L 320 168.7 L 340 169.1 L 360 168.7 L 380 167.5 L 400 165.4 L 420 162.6 L 440 159.2 L 460 155.1 L 480 150.6 L 500 145.8 L 520 140.8 L 540 135.7 L 560 130.8 L 580 126.1 L 600 121.8 L 620 118.0 L 640 114.9 L 660 112.5 L 680 110.8 L 700 110.0 L 720 110.0 L 740 110.9 L 760 112.5 L 780 114.8 L 800 117.8 L 820 121.3 L 840 125.2 L 860 129.3 L 880 133.6 L 900 137.8 L 920 141.8 L 940 145.5 L 960 148.8 L 980 151.4 L 1000 153.4 L 1020 154.7 L 1040 155.1 L 1060 154.7;M -60 137.9 L -40 141.7 L -20 145.8 L 0 150.0 L 20 154.2 L 40 158.3 L 60 162.1 L 80 165.5 L 100 168.3 L 120 170.5 L 140 171.9 L 160 172.6 L 180 172.4 L 200 171.3 L 220 169.5 L 240 166.9 L 260 163.6 L 280 159.7 L 300 155.3 L 320 150.5 L 340 145.5 L 360 140.5 L 380 135.5 L 400 130.7 L 420 126.3 L 440 122.4 L 460 119.1 L 480 116.5 L 500 114.7 L 520 113.6 L 540 113.4 L 560 114.1 L 580 115.5 L 600 117.7 L 620 120.5 L 640 123.9 L 660 127.7 L 680 131.8 L 700 136.0 L 720 140.2 L 740 144.3 L 760 148.1 L 780 151.5 L 800 154.3 L 820 156.5 L 840 157.9 L 860 158.6 L 880 158.4 L 900 157.3 L 920 155.5 L 940 152.9 L 960 149.6 L 980 145.7 L 1000 141.3 L 1020 136.5 L 1040 131.5 L 1060 126.5" dur="11s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.25;0.5;0.75;1" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/>
-    </path>
-    <path class="v5" d="M -60 594.5 L -40 602.2 L -20 610.9 L 0 620.0 L 20 629.1 L 40 637.8 L 60 645.5 L 80 652.1 L 100 657.0 L 120 660.2 L 140 661.4 L 160 660.6 L 180 657.8 L 200 653.3 L 220 647.1 L 240 639.8 L 260 631.5 L 280 622.8 L 300 614.1 L 320 605.8 L 340 598.5 L 360 592.3 L 380 587.8 L 400 585.0 L 420 584.2 L 440 585.4 L 460 588.6 L 480 593.5 L 500 600.1 L 520 607.8 L 540 616.5 L 560 625.6 L 580 634.7 L 600 643.4 L 620 651.1 L 640 657.7 L 660 662.6 L 680 665.8 L 700 667.0 L 720 666.2 L 740 663.4 L 760 658.9 L 780 652.7 L 800 645.4 L 820 637.1 L 840 628.4 L 860 619.7 L 880 611.4 L 900 604.1 L 920 597.9 L 940 593.4 L 960 590.6 L 980 589.8 L 1000 591.0 L 1020 594.2 L 1040 599.1 L 1060 605.7" opacity=".35">
-      <animate attributeName="d" values="M -60 594.5 L -40 602.2 L -20 610.9 L 0 620.0 L 20 629.1 L 40 637.8 L 60 645.5 L 80 652.1 L 100 657.0 L 120 660.2 L 140 661.4 L 160 660.6 L 180 657.8 L 200 653.3 L 220 647.1 L 240 639.8 L 260 631.5 L 280 622.8 L 300 614.1 L 320 605.8 L 340 598.5 L 360 592.3 L 380 587.8 L 400 585.0 L 420 584.2 L 440 585.4 L 460 588.6 L 480 593.5 L 500 600.1 L 520 607.8 L 540 616.5 L 560 625.6 L 580 634.7 L 600 643.4 L 620 651.1 L 640 657.7 L 660 662.6 L 680 665.8 L 700 667.0 L 720 666.2 L 740 663.4 L 760 658.9 L 780 652.7 L 800 645.4 L 820 637.1 L 840 628.4 L 860 619.7 L 880 611.4 L 900 604.1 L 920 597.9 L 940 593.4 L 960 590.6 L 980 589.8 L 1000 591.0 L 1020 594.2 L 1040 599.1 L 1060 605.7;M -60 650.7 L -40 655.6 L -20 658.8 L 0 660.0 L 20 659.2 L 40 656.4 L 60 651.9 L 80 645.7 L 100 638.4 L 120 630.1 L 140 621.4 L 160 612.7 L 180 604.4 L 200 597.1 L 220 590.9 L 240 586.4 L 260 583.6 L 280 582.8 L 300 584.0 L 320 587.2 L 340 592.1 L 360 598.7 L 380 606.4 L 400 615.1 L 420 624.2 L 440 633.3 L 460 642.0 L 480 649.7 L 500 656.3 L 520 661.2 L 540 664.4 L 560 665.6 L 580 664.8 L 600 662.0 L 620 657.5 L 640 651.3 L 660 644.0 L 680 635.7 L 700 627.0 L 720 618.3 L 740 610.0 L 760 602.7 L 780 596.5 L 800 592.0 L 820 589.2 L 840 588.4 L 860 589.6 L 880 592.8 L 900 597.7 L 920 604.3 L 940 612.0 L 960 620.7 L 980 629.8 L 1000 638.9 L 1020 647.6 L 1040 655.3 L 1060 661.9;M -60 644.3 L -40 637.0 L -20 628.7 L 0 620.0 L 20 611.3 L 40 603.0 L 60 595.7 L 80 589.5 L 100 585.0 L 120 582.2 L 140 581.4 L 160 582.6 L 180 585.8 L 200 590.7 L 220 597.3 L 240 605.0 L 260 613.7 L 280 622.8 L 300 631.9 L 320 640.6 L 340 648.3 L 360 654.9 L 380 659.8 L 400 663.0 L 420 664.2 L 440 663.4 L 460 660.6 L 480 656.1 L 500 649.9 L 520 642.6 L 540 634.3 L 560 625.6 L 580 616.9 L 600 608.6 L 620 601.3 L 640 595.1 L 660 590.6 L 680 587.8 L 700 587.0 L 720 588.2 L 740 591.4 L 760 596.3 L 780 602.9 L 800 610.6 L 820 619.3 L 840 628.4 L 860 637.5 L 880 646.2 L 900 653.9 L 920 660.5 L 940 665.4 L 960 668.6 L 980 669.8 L 1000 669.0 L 1020 666.2 L 1040 661.7 L 1060 655.5;M -60 588.1 L -40 583.6 L -20 580.8 L 0 580.0 L 20 581.2 L 40 584.4 L 60 589.3 L 80 595.9 L 100 603.6 L 120 612.3 L 140 621.4 L 160 630.5 L 180 639.2 L 200 646.9 L 220 653.5 L 240 658.4 L 260 661.6 L 280 662.8 L 300 662.0 L 320 659.2 L 340 654.7 L 360 648.5 L 380 641.2 L 400 632.9 L 420 624.2 L 440 615.5 L 460 607.2 L 480 599.9 L 500 593.7 L 520 589.2 L 540 586.4 L 560 585.6 L 580 586.8 L 600 590.0 L 620 594.9 L 640 601.5 L 660 609.2 L 680 617.9 L 700 627.0 L 720 636.1 L 740 644.8 L 760 652.5 L 780 659.1 L 800 664.0 L 820 667.2 L 840 668.4 L 860 667.6 L 880 664.8 L 900 660.3 L 920 654.1 L 940 646.8 L 960 638.5 L 980 629.8 L 1000 621.1 L 1020 612.8 L 1040 605.5 L 1060 599.3;M -60 594.5 L -40 602.2 L -20 610.9 L 0 620.0 L 20 629.1 L 40 637.8 L 60 645.5 L 80 652.1 L 100 657.0 L 120 660.2 L 140 661.4 L 160 660.6 L 180 657.8 L 200 653.3 L 220 647.1 L 240 639.8 L 260 631.5 L 280 622.8 L 300 614.1 L 320 605.8 L 340 598.5 L 360 592.3 L 380 587.8 L 400 585.0 L 420 584.2 L 440 585.4 L 460 588.6 L 480 593.5 L 500 600.1 L 520 607.8 L 540 616.5 L 560 625.6 L 580 634.7 L 600 643.4 L 620 651.1 L 640 657.7 L 660 662.6 L 680 665.8 L 700 667.0 L 720 666.2 L 740 663.4 L 760 658.9 L 780 652.7 L 800 645.4 L 820 637.1 L 840 628.4 L 860 619.7 L 880 611.4 L 900 604.1 L 920 597.9 L 940 593.4 L 960 590.6 L 980 589.8 L 1000 591.0 L 1020 594.2 L 1040 599.1 L 1060 605.7" dur="8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.25;0.5;0.75;1" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/>
-    </path>
-  </svg>
+  <div class="atmos" aria-hidden="true">
+    <div class="smoke"></div>
+    <div class="silhouettes">
+      <img class="s-l" src="image%20copy%209.png" alt="" loading="lazy">
+      <img class="s-r" src="image%20copy%202.png" alt="" loading="lazy">
+    </div>
+  </div>
+  <div class="particles" id="particlesHero" aria-hidden="true"></div>
 
   <div class="jungle-hero__inner">
     <p class="jungle-hero__eyebrow">Rightflow&nbsp;Presents</p>
@@ -347,6 +505,141 @@
 
   <div class="jungle-hero__vignette" aria-hidden="true"></div>
   <div class="jungle-hero__grain" aria-hidden="true"></div>
+</section>
+
+<section class="story" aria-label="The album story">
+  <div class="story__stage">
+    <div class="atmos" aria-hidden="true"><div class="smoke"></div></div>
+    <div class="story__rig">
+      <img class="story__char" src="image%20copy%204.png" alt="Welcome to the Jungle character" loading="lazy">
+    </div>
+    <div class="particles" id="particlesStory" aria-hidden="true"></div>
+
+    <div class="story__steps">
+      <article class="story__step" data-step="0">
+        <h3>Every jungle<br>has a <em>story</em>.</h3>
+        <p>Rightflow presents a 12-track descent into the wild — swagger, survival, and Santa&nbsp;Klara energy.</p>
+      </article>
+      <article class="story__step" data-step="1">
+        <h3>Meet the <em>pack</em>.</h3>
+        <p>Rowdy&nbsp;B · Scottyolorin · Diddy&nbsp;Turner · Blackboy · Osine · Santaklara · Indi — the voices of the jungle.</p>
+      </article>
+      <article class="story__step" data-step="2">
+        <h3>12 tracks.<br>one <em>jungle</em>.</h3>
+        <p>From &ldquo;You Ain&rsquo;t Slick&rdquo; to &ldquo;Transcend&rdquo; to &ldquo;Welcome We Live Here.&rdquo; Survive it.</p>
+      </article>
+    </div>
+
+    <div class="story__cue">Scroll</div>
+  </div>
+</section>
+
+<section class="comic" aria-label="The jungle — comic cast">
+  <div class="comic__splash">
+    <h2>Meet The <em>Cast</em></h2>
+    <p>One jungle. Twelve tracks. A whole crew of survivors.</p>
+  </div>
+
+  <div class="panels">
+    <article class="panel c-red">
+      <span class="panel__num">01</span>
+      <div class="panel__art">
+        <img src="image%20copy%2012.png" alt="Rowdy B" loading="lazy">
+        <span class="boom" style="top:10%; left:6%;">POW!</span>
+      </div>
+      <div class="panel__text">
+        <span class="cap-box">Enter: Rowdy B</span>
+        <span class="bubble">&ldquo;You ain&rsquo;t slick!&rdquo;</span>
+      </div>
+    </article>
+
+    <article class="panel c-purple">
+      <span class="panel__num">02</span>
+      <div class="panel__art">
+        <img src="image%20copy%2011.png" alt="Santa Klara" loading="lazy">
+      </div>
+      <div class="panel__text">
+        <span class="cap-box">Santa Klara</span>
+        <span class="bubble">&ldquo;Time to transcend&hellip;&rdquo;</span>
+      </div>
+    </article>
+
+    <article class="panel c-yellow">
+      <span class="panel__num">03</span>
+      <div class="panel__art">
+        <img src="image%20copy%206.png" alt="Princessa" loading="lazy">
+        <span class="boom" style="top:8%; right:8%; text-shadow:5px 5px 0 var(--green);">ZAP!</span>
+      </div>
+      <div class="panel__text">
+        <span class="cap-box">Princessa</span>
+        <span class="bubble">&ldquo;It&rsquo;s real, princessa!&rdquo;</span>
+      </div>
+    </article>
+
+    <article class="panel c-green">
+      <span class="panel__num">04</span>
+      <div class="panel__art">
+        <img src="image%20copy%209.png" alt="The Watcher" loading="lazy">
+      </div>
+      <div class="panel__text">
+        <span class="cap-box">The Watcher</span>
+        <span class="bubble">&ldquo;Shhh&hellip; just listen.&rdquo;</span>
+      </div>
+    </article>
+
+    <article class="panel c-blue">
+      <span class="panel__num">05</span>
+      <div class="panel__art">
+        <img src="image%20copy%207.png" alt="The Soldier" loading="lazy">
+      </div>
+      <div class="panel__text">
+        <span class="cap-box">The Soldier</span>
+        <span class="bubble">&ldquo;Internet money!&rdquo;</span>
+      </div>
+    </article>
+
+    <article class="panel c-red">
+      <span class="panel__num">06</span>
+      <div class="panel__art">
+        <img src="image%20copy%2013.png" alt="The Hype" loading="lazy">
+      </div>
+      <div class="panel__text">
+        <span class="cap-box">The Hype</span>
+        <span class="bubble">&ldquo;Love &amp; fun, baby!&rdquo;</span>
+      </div>
+    </article>
+
+    <article class="panel c-green">
+      <span class="panel__num">07</span>
+      <div class="panel__art">
+        <img src="image%20copy%2014.png" alt="The Star" loading="lazy">
+      </div>
+      <div class="panel__text">
+        <span class="cap-box">The Star</span>
+        <span class="bubble">&ldquo;Born for the wild.&rdquo;</span>
+      </div>
+    </article>
+
+    <article class="panel c-purple">
+      <span class="panel__num">08</span>
+      <div class="panel__art">
+        <img src="image%20copy%202.png" alt="Man O War" loading="lazy">
+        <span class="boom" style="bottom:14%; left:6%;">BOOM!</span>
+      </div>
+      <div class="panel__text">
+        <span class="cap-box">Man O War</span>
+        <span class="bubble">&ldquo;To battle!&rdquo;</span>
+      </div>
+    </article>
+  </div>
+
+  <div class="comic__outro">
+    <img class="comic__tracklist" src="image%20copy%205.png" alt="Welcome to the Jungle tracklist" loading="lazy">
+    <div>
+      <h2>Out <em>Now</em></h2>
+      <p>12 tracks. One jungle. Survive it.</p>
+    </div>
+  </div>
 </section>
 
 <script>
@@ -466,5 +759,211 @@
   if(!reduce){ setInterval(function(){ spawnNote(); if(playing) spawnNote(); }, 1300); }
 
   render(); restart();
+})();
+</script>
+
+<script>
+(function(){
+  var reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  // ---- animated smoke (fixed blobs, looped drift) ----
+  document.querySelectorAll('.smoke').forEach(function(sm){
+    for(var j=0;j<6;j++){
+      var b=document.createElement('b');
+      if(j%2) b.className='warm';
+      var size=(170+Math.random()*280);
+      b.style.width=size+'px'; b.style.height=size+'px';
+      b.style.left=(Math.random()*100)+'%';
+      b.style.top=(35+Math.random()*65)+'%';
+      b.style.setProperty('--sd',(20+Math.random()*16).toFixed(0)+'s');
+      b.style.setProperty('--sx',(Math.random()*22-11).toFixed(0)+'%');
+      b.style.animationDelay=(-Math.random()*22).toFixed(0)+'s';
+      sm.appendChild(b);
+    }
+  });
+
+  // ---- floating particles (bounded pool, looped) ----
+  if(!reduce){
+    document.querySelectorAll('.particles').forEach(function(pc){
+      var N=pc.id==='particlesStory'?44:26;
+      for(var k=0;k<N;k++){
+        var i=document.createElement('i');
+        i.style.setProperty('--s',(2+Math.random()*4).toFixed(1)+'px');
+        i.style.left=(Math.random()*100)+'%';
+        i.style.setProperty('--d',(9+Math.random()*12).toFixed(1)+'s');
+        i.style.setProperty('--dx',(Math.random()*60-30).toFixed(0)+'px');
+        i.style.animationDelay=(-Math.random()*20).toFixed(1)+'s';
+        if(Math.random()<0.35){ i.style.background='var(--blood)'; i.style.boxShadow='0 0 8px rgba(236,31,26,.85)'; }
+        pc.appendChild(i);
+      }
+    });
+  }
+
+  // ---- scroll story: camera zoom + character reveal + step copy ----
+  var story=document.querySelector('.story');
+  var stage=document.querySelector('.story__stage');
+  var steps=[].slice.call(document.querySelectorAll('.story__step'));
+  if(story && stage){
+    function update(){
+      var total=story.offsetHeight-window.innerHeight;
+      var p=total>0 ? (-story.getBoundingClientRect().top)/total : 0;
+      p=Math.max(0,Math.min(1,p));
+      stage.style.setProperty('--p',p.toFixed(3));
+      var idx=Math.min(steps.length-1, Math.floor(p*steps.length*0.999));
+      steps.forEach(function(s,i){ s.classList.toggle('is-on', i===idx); });
+    }
+    var ticking=false;
+    function onScroll(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ update(); ticking=false; }); }
+    window.addEventListener('scroll',onScroll,{passive:true});
+    window.addEventListener('resize',onScroll);
+    update();
+  }
+
+  // ---- comic panels pop in on scroll ----
+  var panels=[].slice.call(document.querySelectorAll('.panel'));
+  if(panels.length){
+    if(reduce || !('IntersectionObserver' in window)){
+      panels.forEach(function(p){ p.classList.add('is-in'); });
+    } else {
+      var io=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('is-in'); io.unobserve(e.target); } });
+      },{threshold:0.2});
+      panels.forEach(function(p){ io.observe(p); });
+    }
+  }
+})();
+</script>
+
+<script src="three.min.js"></script>
+<script>
+(function(){
+  var mount=document.getElementById('chain3d');
+  if(!mount || !window.THREE) return;
+  var THREE=window.THREE;
+  var reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  var scene=new THREE.Scene();
+  var FOV=42, CAMZ=16;
+  var camera=new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
+  camera.position.set(0,0,CAMZ);
+
+  var renderer;
+  try{ renderer=new THREE.WebGLRenderer({alpha:true, antialias:true}); }
+  catch(e){ return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 1.75));
+  renderer.setClearColor(0x000000, 0);
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.05;
+  mount.appendChild(renderer.domElement);
+
+  // studio gradient env so the steel reflects
+  function makeEnv(){
+    var c=document.createElement('canvas'); c.width=16; c.height=128;
+    var g=c.getContext('2d');
+    var grd=g.createLinearGradient(0,0,0,128);
+    grd.addColorStop(0.00,'#454c59'); grd.addColorStop(0.42,'#c2c9d4');
+    grd.addColorStop(0.50,'#ffffff'); grd.addColorStop(0.58,'#9aa2ad');
+    grd.addColorStop(1.00,'#0a0d12');
+    g.fillStyle=grd; g.fillRect(0,0,16,128);
+    var tex=new THREE.CanvasTexture(c); tex.mapping=THREE.EquirectangularReflectionMapping;
+    var pmrem=new THREE.PMREMGenerator(renderer);
+    var env=pmrem.fromEquirectangular(tex).texture; tex.dispose(); pmrem.dispose();
+    return env;
+  }
+  scene.environment=makeEnv();
+  var key=new THREE.DirectionalLight(0xffffff,1.3); key.position.set(4,6,5); scene.add(key);
+  var fill=new THREE.DirectionalLight(0xffffff,0.5); fill.position.set(-5,-2,3); scene.add(fill);
+  var steel=new THREE.MeshStandardMaterial({ color:0xb9bdc4, metalness:1.0, roughness:0.33, envMapIntensity:1.15 });
+
+  // ---- small oval link geometry (round wire swept along a stadium path) ----
+  var a=0.10, b=0.125, w=0.05, LINKGEO;
+  var PITCH=a+b;
+  (function(){
+    var seg=14, pts=[], i, ang;
+    for(i=0;i<seg;i++) pts.push(new THREE.Vector3(-a+2*a*(i/seg),  b,0));
+    for(i=0;i<seg;i++){ ang=Math.PI/2-Math.PI*(i/seg); pts.push(new THREE.Vector3(a+Math.cos(ang)*b, Math.sin(ang)*b,0)); }
+    for(i=0;i<seg;i++) pts.push(new THREE.Vector3(a-2*a*(i/seg), -b,0));
+    for(i=0;i<seg;i++){ ang=-Math.PI/2-Math.PI*(i/seg); pts.push(new THREE.Vector3(-a+Math.cos(ang)*b, Math.sin(ang)*b,0)); }
+    var curve=new THREE.CatmullRomCurve3(pts,true,'catmullrom',0.0);
+    LINKGEO=new THREE.TubeGeometry(curve, 64, w, 7, true);
+  })();
+
+  // chains flow DIAGONALLY (corner to corner); the wave runs perpendicular to the flow.
+  var ANG=0.42;                                  // ~24deg, lower-left -> upper-right
+  var defs=[
+    { off: 6.4, ang:ANG+0.03, amp:0.50, wl:6.2, spd: 0.8, z: 0.0, ph:0.0 },
+    { off: 2.1, ang:ANG-0.02, amp:0.42, wl:4.9, spd:-0.6, z:-0.4, ph:1.3 },
+    { off:-2.1, ang:ANG+0.02, amp:0.50, wl:5.6, spd: 0.7, z:-0.2, ph:2.4 },
+    { off:-6.4, ang:ANG-0.03, amp:0.58, wl:7.1, spd:-0.5, z: 0.0, ph:3.1 }
+  ];
+  var chains=defs.map(function(d){
+    var g=new THREE.Group(); scene.add(g);
+    return { def:d, group:g, links:[], k:2*Math.PI/d.wl };
+  });
+
+  var halfH=Math.tan(FOV*Math.PI/360)*CAMZ, halfW=halfH, S=halfW;
+  function ensureLinks(){
+    S=Math.hypot(halfW,halfH)*1.3;               // long enough to exit both corners
+    var count=Math.max(4, Math.ceil((S*2)/PITCH)+2);
+    chains.forEach(function(c){
+      while(c.links.length<count){ var m=new THREE.Mesh(LINKGEO, steel); c.group.add(m); c.links.push(m); }
+      for(var i=0;i<c.links.length;i++) c.links[i].visible = i<count;
+      c.count=count;
+    });
+  }
+  function resize(){
+    var w=window.innerWidth, h=window.innerHeight;
+    renderer.setSize(w,h,false);
+    camera.aspect=w/h; camera.updateProjectionMatrix();
+    halfH=Math.tan(FOV*Math.PI/360)*CAMZ; halfW=halfH*camera.aspect;
+    ensureLinks();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---- cursor interaction: links bulge away from the pointer ----
+  var tgt={x:1e6,y:1e6}, cur={x:1e6,y:1e6}, RAD=2.6, FORCE=1.7;
+  window.addEventListener('pointermove', function(e){
+    var nx=(e.clientX/window.innerWidth)*2-1, ny=-(e.clientY/window.innerHeight)*2+1;
+    tgt.x=nx*halfW; tgt.y=ny*halfH;
+  }, {passive:true});
+  window.addEventListener('pointerleave', function(){ tgt.x=1e6; tgt.y=1e6; });
+
+  var _x=new THREE.Vector3(),_y=new THREE.Vector3(),_z=new THREE.Vector3(),
+      _n=new THREE.Vector3(),_m=new THREE.Matrix4(), P=[];
+  function buildChain(c, time){
+    var d=c.def, n=c.count, i;
+    var ca=Math.cos(d.ang), sa=Math.sin(d.ang);   // flow dir
+    var px=-sa, py=ca;                            // perpendicular (wave) dir
+    var ox=px*d.off, oy=py*d.off;                 // chain centre offset
+    while(P.length<n) P.push(new THREE.Vector3());
+    for(i=0;i<n;i++){
+      var sP=-S + i*PITCH;
+      var wv=d.amp*Math.sin(c.k*sP + time*d.spd + d.ph);
+      P[i].set(ox + ca*sP + px*wv, oy + sa*sP + py*wv, d.z);
+      var dx=P[i].x-cur.x, dy=P[i].y-cur.y, dist=Math.hypot(dx,dy);   // push from cursor
+      if(dist<RAD){ var f=FORCE*(1-dist/RAD), inv=1/(dist||1e-3); P[i].x+=dx*inv*f; P[i].y+=dy*inv*f; }
+    }
+    for(i=0;i<n;i++){
+      var p0=P[Math.max(0,i-1)], p1=P[Math.min(n-1,i+1)];
+      _x.subVectors(p1,p0); if(_x.lengthSq()<1e-9)_x.set(1,0,0); _x.normalize();
+      _n.set(0,1,0); if(Math.abs(_x.y)>0.9)_n.set(1,0,0);
+      _y.crossVectors(_x,_n).normalize();
+      _z.crossVectors(_x,_y).normalize();
+      var hole=(i%2===0)?_y:_z;                   // alternate hole axis -> interlock
+      _z.copy(hole); _y.crossVectors(_z,_x).normalize();
+      _m.makeBasis(_x,_y,_z);
+      var lk=c.links[i]; lk.position.copy(P[i]); lk.quaternion.setFromRotationMatrix(_m);
+    }
+  }
+
+  function frame(t){
+    var time=t*0.001;
+    cur.x += (tgt.x-cur.x)*0.12; cur.y += (tgt.y-cur.y)*0.12;
+    for(var i=0;i<chains.length;i++) buildChain(chains[i], time);
+    renderer.render(scene,camera);
+    if(!reduce) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 })();
 </script>
