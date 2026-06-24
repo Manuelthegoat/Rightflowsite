@@ -841,6 +841,7 @@
   if(!mount || !window.THREE) return;
   var THREE=window.THREE;
   var reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function rnd(a,b){ return a+Math.random()*(b-a); }
 
   var scene=new THREE.Scene();
   var FOV=42, CAMZ=16;
@@ -877,7 +878,6 @@
 
   // ---- small oval link geometry (round wire swept along a stadium path) ----
   var a=0.10, b=0.125, w=0.05, LINKGEO;
-  var PITCH=a+b;
   (function(){
     var seg=14, pts=[], i, ang;
     for(i=0;i<seg;i++) pts.push(new THREE.Vector3(-a+2*a*(i/seg),  b,0));
@@ -888,79 +888,75 @@
     LINKGEO=new THREE.TubeGeometry(curve, 64, w, 7, true);
   })();
 
-  // chains flow DIAGONALLY (corner to corner); the wave runs perpendicular to the flow.
-  var ANG=0.42;                                  // ~24deg, lower-left -> upper-right
-  var defs=[
-    { off: 6.4, ang:ANG+0.03, amp:0.50, wl:6.2, spd: 0.8, z: 0.0, ph:0.0 },
-    { off: 2.1, ang:ANG-0.02, amp:0.42, wl:4.9, spd:-0.6, z:-0.4, ph:1.3 },
-    { off:-2.1, ang:ANG+0.02, amp:0.50, wl:5.6, spd: 0.7, z:-0.2, ph:2.4 },
-    { off:-6.4, ang:ANG-0.03, amp:0.58, wl:7.1, spd:-0.5, z: 0.0, ph:3.1 }
-  ];
-  var chains=defs.map(function(d){
-    var g=new THREE.Group(); scene.add(g);
-    return { def:d, group:g, links:[], k:2*Math.PI/d.wl };
-  });
-
-  var halfH=Math.tan(FOV*Math.PI/360)*CAMZ, halfW=halfH, S=halfW;
-  function ensureLinks(){
-    S=Math.hypot(halfW,halfH)*1.3;               // long enough to exit both corners
-    var count=Math.max(4, Math.ceil((S*2)/PITCH)+2);
-    chains.forEach(function(c){
-      while(c.links.length<count){ var m=new THREE.Mesh(LINKGEO, steel); c.group.add(m); c.links.push(m); }
-      for(var i=0;i<c.links.length;i++) c.links[i].visible = i<count;
-      c.count=count;
+  // ---- loose, separate links scattered across the page, each with its own random motion ----
+  var COUNT=84, links=[];
+  for(var n=0;n<COUNT;n++){
+    var m=new THREE.Mesh(LINKGEO, steel);
+    var axis=new THREE.Vector3(rnd(-1,1),rnd(-1,1),rnd(-1,1));
+    if(axis.lengthSq()<1e-4) axis.set(0,1,0);
+    axis.normalize();
+    m.scale.setScalar(rnd(0.65,1.25));
+    scene.add(m);
+    links.push({
+      mesh:m,
+      nx:rnd(-1,1), ny:rnd(-1,1), z:rnd(-2.6,1.2),
+      axis:axis, baseAng:rnd(0,Math.PI*2), spin:(Math.random()<0.5?-1:1)*rnd(0.12,0.5),
+      fax:rnd(0.25,0.75), fpx:rnd(0,6.28), fsx:(Math.random()<0.5?-1:1)*rnd(0.25,0.8),
+      fay:rnd(0.25,0.75), fpy:rnd(0,6.28), fsy:(Math.random()<0.5?-1:1)*rnd(0.25,0.8),
+      faz:rnd(0.15,0.5),  fpz:rnd(0,6.28), fsz:rnd(0.2,0.5),
+      dx:0, dy:0, sp:0                    // eased push offset + spin boost (for fluidity)
     });
   }
+
+  var halfH=Math.tan(FOV*Math.PI/360)*CAMZ, halfW=halfH;
   function resize(){
     var w=window.innerWidth, h=window.innerHeight;
     renderer.setSize(w,h,false);
     camera.aspect=w/h; camera.updateProjectionMatrix();
     halfH=Math.tan(FOV*Math.PI/360)*CAMZ; halfW=halfH*camera.aspect;
-    ensureLinks();
   }
   window.addEventListener('resize', resize);
   resize();
 
-  // ---- cursor interaction: links bulge away from the pointer ----
-  var tgt={x:1e6,y:1e6}, cur={x:1e6,y:1e6}, RAD=2.6, FORCE=1.7;
+  // ---- fluid cursor interaction ----
+  var tgt={x:1e6,y:1e6}, cur={x:1e6,y:1e6}, RAD=3.2, FORCE=2.1;
   window.addEventListener('pointermove', function(e){
     var nx=(e.clientX/window.innerWidth)*2-1, ny=-(e.clientY/window.innerHeight)*2+1;
     tgt.x=nx*halfW; tgt.y=ny*halfH;
   }, {passive:true});
   window.addEventListener('pointerleave', function(){ tgt.x=1e6; tgt.y=1e6; });
 
-  var _x=new THREE.Vector3(),_y=new THREE.Vector3(),_z=new THREE.Vector3(),
-      _n=new THREE.Vector3(),_m=new THREE.Matrix4(), P=[];
-  function buildChain(c, time){
-    var d=c.def, n=c.count, i;
-    var ca=Math.cos(d.ang), sa=Math.sin(d.ang);   // flow dir
-    var px=-sa, py=ca;                            // perpendicular (wave) dir
-    var ox=px*d.off, oy=py*d.off;                 // chain centre offset
-    while(P.length<n) P.push(new THREE.Vector3());
-    for(i=0;i<n;i++){
-      var sP=-S + i*PITCH;
-      var wv=d.amp*Math.sin(c.k*sP + time*d.spd + d.ph);
-      P[i].set(ox + ca*sP + px*wv, oy + sa*sP + py*wv, d.z);
-      var dx=P[i].x-cur.x, dy=P[i].y-cur.y, dist=Math.hypot(dx,dy);   // push from cursor
-      if(dist<RAD){ var f=FORCE*(1-dist/RAD), inv=1/(dist||1e-3); P[i].x+=dx*inv*f; P[i].y+=dy*inv*f; }
-    }
-    for(i=0;i<n;i++){
-      var p0=P[Math.max(0,i-1)], p1=P[Math.min(n-1,i+1)];
-      _x.subVectors(p1,p0); if(_x.lengthSq()<1e-9)_x.set(1,0,0); _x.normalize();
-      _n.set(0,1,0); if(Math.abs(_x.y)>0.9)_n.set(1,0,0);
-      _y.crossVectors(_x,_n).normalize();
-      _z.crossVectors(_x,_y).normalize();
-      var hole=(i%2===0)?_y:_z;                   // alternate hole axis -> interlock
-      _z.copy(hole); _y.crossVectors(_z,_x).normalize();
-      _m.makeBasis(_x,_y,_z);
-      var lk=c.links[i]; lk.position.copy(P[i]); lk.quaternion.setFromRotationMatrix(_m);
-    }
-  }
-
+  var last=0;
   function frame(t){
     var time=t*0.001;
-    cur.x += (tgt.x-cur.x)*0.12; cur.y += (tgt.y-cur.y)*0.12;
-    for(var i=0;i<chains.length;i++) buildChain(chains[i], time);
+    var dt=Math.min(0.05, (t-last)/1000)||0.016; last=t;
+    // frame-rate independent smoothing factors
+    var curK=1-Math.pow(0.0009, dt);     // cursor follow  (~smooth, snappy enough to track)
+    var dispK=1-Math.pow(0.00012, dt);   // per-link displacement ease (slower -> fluid swell/settle)
+    cur.x += (tgt.x-cur.x)*curK; cur.y += (tgt.y-cur.y)*curK;
+
+    for(var i=0;i<links.length;i++){
+      var L=links[i];
+      var bx=L.nx*halfW*1.06 + L.fax*Math.sin(time*L.fsx + L.fpx);
+      var by=L.ny*halfH*1.06 + L.fay*Math.sin(time*L.fsy + L.fpy);
+      var z =L.z + L.faz*Math.sin(time*L.fsz + L.fpz);
+
+      // target push: smoothstep falloff -> soft edge, no hard cutoff
+      var tx=0, ty=0, near=0;
+      var ddx=bx-cur.x, ddy=by-cur.y, dist=Math.hypot(ddx,ddy);
+      if(dist<RAD){
+        var u=1-dist/RAD; var fall=u*u*(3-2*u);   // smoothstep
+        var inv=1/(dist||1e-3);
+        tx=ddx*inv*FORCE*fall; ty=ddy*inv*FORCE*fall; near=fall;
+      }
+      // ease the displacement + a little spin boost so motion flows in and out
+      L.dx += (tx-L.dx)*dispK;
+      L.dy += (ty-L.dy)*dispK;
+      L.sp += (near*2.2 - L.sp)*dispK;
+
+      L.mesh.position.set(bx+L.dx, by+L.dy, z);
+      L.mesh.quaternion.setFromAxisAngle(L.axis, L.baseAng + time*(L.spin+L.sp));
+    }
     renderer.render(scene,camera);
     if(!reduce) requestAnimationFrame(frame);
   }
