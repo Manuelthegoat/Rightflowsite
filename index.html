@@ -6,7 +6,8 @@
 <link
   href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Comic+Neue:ital,wght@0,400;0,700;1,700&family=Permanent+Marker&family=Caveat:wght@600;700&family=Space+Mono:wght@400;700&display=swap"
   rel="stylesheet">
-
+  <link rel="icon" type="image/png" href="image copy 3.png">
+<title>Welcome To The Jungle - Rightflow</title>
 <style>
   :root {
     --ink: #050a07;
@@ -111,6 +112,61 @@
 
     100% {
       transform: translate(0, 0)
+    }
+  }
+
+  .preloader {
+    position: fixed;
+    inset: 0;
+    background: #050a07;
+    z-index: 99999;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    transition:
+      opacity .8s ease,
+      visibility .8s ease;
+  }
+
+  .preloader.hide {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .preloader-content {
+    text-align: center;
+  }
+
+  .preloader h2 {
+    font-family: "Bangers", sans-serif;
+    color: #e9e7da;
+    font-size: clamp(32px, 6vw, 70px);
+    margin-top: 20px;
+  }
+
+  .preloader p {
+    color: #3fd97f;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  .loader-ring {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+
+    border: 4px solid rgba(255, 255, 255, .08);
+    border-top-color: #16a64f;
+
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 
@@ -1181,6 +1237,82 @@
 
   }
 
+  .preloader-cover {
+    width: 220px;
+    border-radius: 12px;
+
+    animation:
+      pulse 2s ease-in-out infinite,
+      floaty 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    50% {
+      transform: scale(1.04);
+    }
+  }
+
+  @keyframes floaty {
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .preview-btn {
+    margin-top: 12px;
+    align-self: flex-start;
+
+    padding: 12px 18px;
+
+    border: 3px solid #111;
+    background: var(--blood);
+
+    color: white;
+    font-family: "Bangers", cursive;
+    font-size: 18px;
+    letter-spacing: .03em;
+
+    cursor: pointer;
+
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, .8);
+
+    transition: .2s ease;
+  }
+  .tease {
+    margin-top: 12px;
+    align-self: flex-start;
+
+    padding: 12px 18px;
+
+    border: 3px solid #111;
+    background: var(--blood);
+
+    color: white;
+    font-family: "Bangers", cursive;
+    font-size: 18px;
+    letter-spacing: .03em;
+
+    cursor: pointer;
+
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, .8);
+
+    transition: .2s ease;
+  }
+
+  .preview-btn:hover {
+    transform: translate(-2px, -2px);
+
+    box-shadow:
+      6px 6px 0 rgba(0, 0, 0, .8);
+  }
+
+  .preview-btn:active {
+    transform: translate(2px, 2px);
+
+    box-shadow:
+      2px 2px 0 rgba(0, 0, 0, .8);
+  }
+
   @media (max-width:680px) {
     .panel {
       grid-template-columns: 1fr;
@@ -1212,6 +1344,14 @@
 </style>
 
 <div class="chain3d" id="chain3d" aria-hidden="true"></div>
+<div class="preloader" id="preloader">
+  <div class="preloader-content">
+    <img src="artwork.PNG" class="preloader-cover" alt="">
+    <h2>WELCOME TO THE JUNGLE</h2>
+
+    <p>Loading the experience...</p>
+  </div>
+</div>
 
 <section class="jungle-hero" aria-label="Welcome to the Jungle — album hero">
 
@@ -1310,6 +1450,9 @@
       <div class="panel__text">
         <span class="cap-box">Rowdy B</span>
         <span class="bubble">&ldquo;You Ain&rsquo;t Sl1ck!&rdquo;</span>
+          <button class="preview-btn" data-audio="songs/Youaintslick.m4a">
+          ▶ Play Preview
+        </button>
       </div>
     </article>
 
@@ -1321,6 +1464,9 @@
       <div class="panel__text">
         <span class="cap-box">Scotty Olorin</span>
         <span class="bubble">&ldquo;Farm City [Cana Music]&hellip;&rdquo;</span>
+          <button class="tease">
+          You Just gotta get to the album
+        </button>
       </div>
     </article>
 
@@ -1333,17 +1479,27 @@
       <div class="panel__text">
         <span class="cap-box">Luwa.Mp4</span>
         <span class="bubble">&ldquo;Reject Boyz 2&rdquo;</span>
+          <button class="preview-btn" data-audio="songs/RejectBoyz.m4a">
+          ▶ Play Preview
+        </button>
       </div>
     </article>
 
     <article class="panel c-yellow">
       <span class="panel__num">04</span>
+
       <div class="panel__art">
         <img src="transdiddy.PNG" alt="Diddy Turner" loading="lazy">
       </div>
+
       <div class="panel__text">
         <span class="cap-box">Diddy Turner</span>
-        <span class="bubble">&ldquo;Women On Women&rdquo;</span>
+
+        <span class="bubble">“Women On Women”</span>
+
+        <button class="preview-btn" data-audio="songs/Womenonwomen.m4a">
+          ▶ Play Preview
+        </button>
       </div>
     </article>
 
@@ -1355,6 +1511,9 @@
       <div class="panel__text">
         <span class="cap-box">BlacBoyy</span>
         <span class="bubble">&ldquo;Love & Fun&rdquo;</span>
+          <button class="tease">
+          Go to the album
+        </button>
       </div>
     </article>
 
@@ -1369,6 +1528,9 @@
       <div class="panel__text">
         <span class="cap-box">Zaylevelten</span>
         <span class="bubble">&ldquo;Man O War!&rdquo;</span>
+          <button class="tease">
+          THE ALBUM!
+        </button>
       </div>
     </article>
 
@@ -1380,6 +1542,9 @@
       <div class="panel__text">
         <span class="cap-box">Nm Kay</span>
         <span class="bubble">&ldquo;Internet Money&rdquo;</span>
+         <button class="preview-btn" data-audio="songs/Disrespext.m4a">
+          ▶ Play Preview
+        </button>
       </div>
     </article>
 
@@ -1391,6 +1556,9 @@
       <div class="panel__text">
         <span class="cap-box">Osime</span>
         <span class="bubble">&ldquo;What's Your Name?&rdquo;</span>
+         <button class="preview-btn" data-audio="songs/WhatsyourName.m4a">
+          ▶ Play Preview
+        </button>
       </div>
     </article>
     <article class="panel c-red">
@@ -1401,6 +1569,9 @@
       <div class="panel__text">
         <span class="cap-box">SantaKlara</span>
         <span class="bubble">&ldquo;Transcend&rdquo;</span>
+         <button class="preview-btn" data-audio="songs/Transcend.m4a">
+          ▶ Play Preview
+        </button>
       </div>
     </article>
     <article class="panel c-blue">
@@ -1413,6 +1584,9 @@
       <div class="panel__text">
         <span class="cap-box">Indi</span>
         <span class="bubble">&ldquo;Its Real Princessa&rdquo;</span>
+         <button class="preview-btn" data-audio="songs/ItsrealPrincessa.m4a">
+          ▶ Play Preview
+        </button>
       </div>
     </article>
   </div>
@@ -1621,6 +1795,55 @@
 
 <script src="three.min.js"></script>
 <script>
+  let currentAudio = null;
+  let currentButton = null;
+
+  document.querySelectorAll('.preview-btn').forEach(btn => {
+
+    btn.addEventListener('click', () => {
+
+      const src = btn.dataset.audio;
+
+      if (
+        currentAudio &&
+        currentAudio.src.includes(src)
+      ) {
+
+        if (currentAudio.paused) {
+          currentAudio.play();
+          btn.textContent = '⏸ Pause Preview';
+        } else {
+          currentAudio.pause();
+          btn.textContent = '▶ Play Preview';
+        }
+
+        return;
+      }
+
+      if (currentAudio) {
+        currentAudio.pause();
+
+        if (currentButton) {
+          currentButton.textContent = '▶ Play Preview';
+        }
+      }
+
+      currentAudio = new Audio(src);
+      currentButton = btn;
+
+      currentAudio.play().catch(err => {
+        console.error('Audio error:', err);
+      });
+      btn.textContent = '⏸ Pause Preview';
+
+      currentAudio.addEventListener('ended', () => {
+        btn.textContent = '▶ Play Preview';
+      });
+    });
+
+  });
+</script>
+<script>
   (function () {
     var mount = document.getElementById('chain3d');
     if (!mount || !window.THREE) return;
@@ -1674,7 +1897,8 @@
     })();
 
     // ---- loose, separate links scattered across the page, each with its own random motion ----
-    var COUNT = 84, links = [];
+    var COUNT = window.innerWidth < 768 ? 20 : 40;
+    var links = [];
     for (var n = 0; n < COUNT; n++) {
       var m = new THREE.Mesh(LINKGEO, steel);
       var axis = new THREE.Vector3(rnd(-1, 1), rnd(-1, 1), rnd(-1, 1));
@@ -1747,4 +1971,15 @@
     }
     requestAnimationFrame(frame);
   })();
+</script>
+<script>
+  window.addEventListener('load', function () {
+
+    var loader = document.getElementById('preloader');
+
+    setTimeout(function () {
+      loader.classList.add('hide');
+    }, 800);
+
+  });
 </script>
